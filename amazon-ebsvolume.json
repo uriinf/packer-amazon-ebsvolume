@@ -1,0 +1,65 @@
+{
+  "builders": [
+    {
+      "type": "amazon-ebsvolume",
+      "region": "us-east-1",
+      "source_ami": "ami-0eb3f07edbf9e6dca",
+      "instance_type": "c5.large",
+      "spot_price": "auto",
+      "vpc_id": "vpc-fb556b81",
+      "subnet_id": "subnet-839a78e5",
+      "associate_public_ip_address": "true",
+      "shutdown_behavior": "terminate",
+      "ssh_username": "centos",
+      "ssh_interface": "public_ip",
+      "ssh_pty": "true",
+      "ebs_volumes": [
+        {
+          "device_name": "/dev/sda1",
+          "delete_on_termination": true
+        },
+        {
+          "device_name": "/dev/sdb",
+          "delete_on_termination": false,
+          "tags": {
+            "Name": "test_sdb",
+            "tag1": "test",
+            "tag2": "tag2"
+          },
+          "volume_size": 1
+        },
+        {
+          "device_name": "/dev/sdc",
+          "delete_on_termination": false,
+          "tags": {
+            "Name": "test_sdc",
+            "tag1": "test",
+            "tag2": "tag2"
+          },
+          "volume_size": 1
+        }
+      ]
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo lsblk -o +NAME,LABEL"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "output": "manifest.json",
+      "strip_path": true,
+      "type": "manifest"
+    },
+    {
+      "inline": [
+        "jq \".builds[]\" manifest.json"
+      ],
+      "type": "shell-local"
+    }
+  ]
+}
